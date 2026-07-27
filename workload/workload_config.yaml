@@ -1,0 +1,123 @@
+# PetClinic Workload Generator Configuration
+# Defines traffic patterns for monitoring runs
+
+global:
+  base_url: "http://localhost:8080"
+  duration_seconds: 300          # total run duration (5 minutes)
+  ramp_up_seconds: 30            # time to reach peak concurrency
+  ramp_down_seconds: 30
+  request_timeout_seconds: 10
+  log_file: "workload_results.csv"
+
+# Traffic phases allow us to model realistic usage patterns including peaks
+phases:
+  - name: "baseline"
+    start_second: 0
+    end_second: 60
+    requests_per_second: 5
+    concurrent_users: 5
+
+  - name: "normal_load"
+    start_second: 60
+    end_second: 150
+    requests_per_second: 15
+    concurrent_users: 10
+
+  - name: "peak_load"
+    start_second: 150
+    end_second: 210
+    requests_per_second: 40
+    concurrent_users: 25
+
+  - name: "post_peak"
+    start_second: 210
+    end_second: 270
+    requests_per_second: 15
+    concurrent_users: 10
+
+  - name: "cooldown"
+    start_second: 270
+    end_second: 300
+    requests_per_second: 5
+    concurrent_users: 5
+
+# Endpoints to exercise, with relative weights (must sum to 100)
+endpoints:
+  - name: "list_owners"
+    method: GET
+    path: "/api/customer/owners"
+    weight: 20
+    expected_status: 200
+
+  - name: "get_owner_by_id"
+    method: GET
+    path: "/api/customer/owners/{id}"
+    weight: 15
+    path_params:
+      id:
+        type: range
+        min: 1
+        max: 10
+    expected_status: 200
+
+  - name: "list_vets"
+    method: GET
+    path: "/api/vet/vets"
+    weight: 20
+    expected_status: 200
+
+  - name: "get_visits_for_pet"
+    method: GET
+    path: "/api/visit/owners/{ownerId}/pets/{petId}/visits"
+    weight: 15
+    path_params:
+      ownerId:
+        type: range
+        min: 1
+        max: 10
+      petId:
+        type: range
+        min: 1
+        max: 13
+    expected_status: 200
+
+  - name: "get_owner_pets"
+    method: GET
+    path: "/api/customer/owners/{id}/pets"
+    weight: 15
+    path_params:
+      id:
+        type: range
+        min: 1
+        max: 10
+    expected_status: 200
+
+  - name: "add_visit"
+    method: POST
+    path: "/api/visit/owners/{ownerId}/pets/{petId}/visits"
+    weight: 10
+    path_params:
+      ownerId:
+        type: range
+        min: 1
+        max: 10
+      petId:
+        type: range
+        min: 1
+        max: 13
+    body_template:
+      date: "2026-07-19"
+      description: "Routine checkup - workload test"
+    expected_status: 201
+
+  - name: "add_owner"
+    method: POST
+    path: "/api/customer/owners"
+    weight: 5
+    body_template:
+      firstName: "LoadTest"
+      lastName: "User"
+      address: "123 Test Street"
+      city: "Montreal"
+      telephone: "5141234567"
+    expected_status: 201

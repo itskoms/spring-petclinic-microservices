@@ -138,6 +138,24 @@ services:
     ports:
      - 9090:9090
 
+  ## cAdvisor — container-level CPU / memory / network / disk metrics
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    privileged: true
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - 8086:8080
+
   ## Grafana / Prometheus
 
   grafana-server:

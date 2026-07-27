@@ -30,3 +30,7 @@ scrape_configs:
   metrics_path: /actuator/prometheus
   static_configs:
   - targets: ['vets-service:8083']
+
+- job_name: cadvisor
+  static_configs:
+  - targets: ['cadvisor:8080']
